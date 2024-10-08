@@ -1,0 +1,18 @@
+# Ignore virtual environments (since we will install dependencies in the container)
+venv/
+
+# Ignore Git-related files (not needed in the image)
+.git/
+.github/
+.gitignore
+
+# Ignore local environment files (they're for local development, not for production)
+.env
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore logs
+*.log

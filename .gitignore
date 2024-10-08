@@ -1,2 +1,14 @@
+# Ignore virtual environments
 venv/
-__pycache__
+# Ignore environment files
+.env
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+# Ignore logs
+*.log
+# Ignore Git-related files
+.git/
+# Ignore Docker environment file
+docker.env

@@ -1,14 +1,18 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from database import SessionLocal, init_db, ExampleData
-from dotenv import load_dotenv
+from app.database import SessionLocal, init_db, ExampleData
 import os
-from database import init_db
 from contextlib import asynccontextmanager
 
-# Define the FastAPI app
-app = FastAPI()
+# Get database credentials from environment variables (Docker will pass them)
+username = os.getenv("DATABASE_USERNAME")
+password = os.getenv("DATABASE_PASSWORD")
+server = os.getenv("DATABASE_SERVER")
+database = os.getenv("DATABASE_NAME")
+
+# Database connection URL
+DATABASE_URL = f'mssql+pyodbc://{username}:{password}@{server}:1433/{database}?driver=ODBC+Driver+18+for+SQL+Server'
 
 # Lifespan event handler for startup and shutdown
 @asynccontextmanager
@@ -18,18 +22,8 @@ async def lifespan(app: FastAPI):
     yield  # Code after yield runs during shutdown
     # Code to run on shutdown (if needed)
 
-# Assign the lifespan function to the FastAPI app
+# Create FastAPI app with the lifespan event handler
 app = FastAPI(lifespan=lifespan)
-
-# Load environment variables from the .env file
-load_dotenv()
-
-username = os.getenv("DATABASE_USERNAME")
-password = os.getenv("DATABASE_PASSWORD")
-server = os.getenv("DATABASE_SERVER")
-database = os.getenv("DATABASE_NAME")
-
-DATABASE_URL = f'mssql+pyodbc://{username}:{password}@{server}:1433/{database}?driver=ODBC+Driver+18+for+SQL+Server'
 
 # Dependency to get the database session
 def get_db():
@@ -39,25 +33,16 @@ def get_db():
     finally:
         db.close()
 
-# Pydantic model to handle POST request data
+# Pydantic model for POST data
 class ExampleDataCreate(BaseModel):
     name: str
     description: str = None
 
-# Endpoint to post data and store it in the database
+# Endpoint to create new data in the database
 @app.post("/data/")
 def create_data(data: ExampleDataCreate, db: Session = Depends(get_db)):
-    # Create an instance of the ExampleData model
     db_data = ExampleData(name=data.name, description=data.description)
-    
-    # Add the new data to the session
     db.add(db_data)
-    
-    # Commit the transaction
     db.commit()
-    
-    # Refresh the instance to return the new data with its ID
     db.refresh(db_data)
-    
     return db_data
-
