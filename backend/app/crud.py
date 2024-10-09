@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 from passlib.context import CryptContext
+import logging
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -31,24 +32,17 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 def create_log(db: Session, log: schemas.LogCreate):
-    db_log = models.Log(
-        timestamp=log.timestamp,
-        event=log.event,
-        user=log.user,
-        ip=log.ip,
-        site_url=log.site_url,
-        url=log.url,
-        method=log.method,
-        user_agent=log.user_agent,
-        referrer=log.referrer,
-        query_string=log.query_string,
-        remote_addr=log.remote_addr,
-        request_time=log.request_time,
-        extra=log.extra
-    )
+    log_data = log.dict()
+    log_data['site_url'] = str(log_data['site_url'])
+    log_data['referrer'] = str(log_data['referrer'])
+    # Convert timezone-aware datetime to naive datetime (UTC)
+    log_data['timestamp'] = log_data['timestamp'].replace(tzinfo=None)
+    
+    db_log = models.Log(**log_data)
     db.add(db_log)
     db.commit()
     db.refresh(db_log)
+    logging.info(f"Log with ID {db_log.id} added to the database.")
     return db_log
 
 def get_logs(db: Session, skip: int = 0, limit: int = 100):

@@ -44,19 +44,19 @@ class TokenData(BaseModel):
     user_id: Optional[int] = None
 
 class LogCreate(BaseModel):
-    timestamp: Optional[datetime] = None  # Optional; defaults to server time if not provided
+    timestamp: datetime
     event: str
     user: str
     ip: str
-    site_url: HttpUrl
+    site_url: str
     url: str
     method: str
     user_agent: str
-    referrer: Optional[str] = None
-    query_string: Optional[str] = None
+    referrer: str
+    query_string: str
     remote_addr: str
-    request_time: Optional[int] = None
-    extra: Optional[str] = None
+    request_time: int
+    extra: str
 
 class LogOut(BaseModel):
     id: int
@@ -64,15 +64,15 @@ class LogOut(BaseModel):
     event: str
     user: str
     ip: str
-    site_url: HttpUrl
+    site_url: str
     url: str
     method: str
     user_agent: str
-    referrer: Optional[str]
-    query_string: Optional[str]
+    referrer: str
+    query_string: str
     remote_addr: str
-    request_time: Optional[int]
-    extra: Optional[str]
+    request_time: int
+    extra: str
 
     class Config:
         from_attributes = True 
