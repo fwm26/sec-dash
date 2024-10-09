@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from . import schemas, crud, models
 from .database import SessionLocal
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 import os
@@ -104,3 +104,20 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @router.get("/users/me", response_model=schemas.UserOut)
 def read_users_me(current_user: models.User = Depends(get_current_user)):
     return current_user
+
+# Logs endpoint
+@router.post("/logs", response_model=schemas.LogOut, status_code=status.HTTP_201_CREATED)
+def create_log_entry(log: schemas.LogCreate, db: Session = Depends(get_db)):
+    return crud.create_log(db=db, log=log)
+
+@router.get("/logs", response_model=List[schemas.LogOut])
+def read_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    logs = crud.get_logs(db, skip=skip, limit=limit)
+    return logs
+
+@router.get("/logs/{log_id}", response_model=schemas.LogOut)
+def read_log(log_id: int, db: Session = Depends(get_db)):
+    db_log = crud.get_log(db, log_id=log_id)
+    if db_log is None:
+        raise HTTPException(status_code=404, detail="Log not found")
+    return db_log

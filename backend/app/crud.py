@@ -29,3 +29,30 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def create_log(db: Session, log: schemas.LogCreate):
+    db_log = models.Log(
+        timestamp=log.timestamp,
+        event=log.event,
+        user=log.user,
+        ip=log.ip,
+        site_url=log.site_url,
+        url=log.url,
+        method=log.method,
+        user_agent=log.user_agent,
+        referrer=log.referrer,
+        query_string=log.query_string,
+        remote_addr=log.remote_addr,
+        request_time=log.request_time,
+        extra=log.extra
+    )
+    db.add(db_log)
+    db.commit()
+    db.refresh(db_log)
+    return db_log
+
+def get_logs(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Log).offset(skip).limit(limit).all()
+
+def get_log(db: Session, log_id: int):
+    return db.query(models.Log).filter(models.Log.id == log_id).first()

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, constr, field_validator
+from pydantic import BaseModel, EmailStr, constr, field_validator, HttpUrl
 from typing import Optional
 from datetime import datetime
 import re
@@ -33,7 +33,7 @@ class UserOut(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True  # Updated from orm_mode
+        from_attributes = True 
 
 # Token schemas
 class Token(BaseModel):
@@ -42,3 +42,37 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     user_id: Optional[int] = None
+
+class LogCreate(BaseModel):
+    timestamp: Optional[datetime] = None  # Optional; defaults to server time if not provided
+    event: str
+    user: str
+    ip: str
+    site_url: HttpUrl
+    url: str
+    method: str
+    user_agent: str
+    referrer: Optional[str] = None
+    query_string: Optional[str] = None
+    remote_addr: str
+    request_time: Optional[int] = None
+    extra: Optional[str] = None
+
+class LogOut(BaseModel):
+    id: int
+    timestamp: datetime
+    event: str
+    user: str
+    ip: str
+    site_url: HttpUrl
+    url: str
+    method: str
+    user_agent: str
+    referrer: Optional[str]
+    query_string: Optional[str]
+    remote_addr: str
+    request_time: Optional[int]
+    extra: Optional[str]
+
+    class Config:
+        from_attributes = True 

@@ -13,7 +13,7 @@ app = FastAPI(title="Sec-Dash API")
 origins = [
     "http://localhost",
     "http://localhost:8000",
-    # Add your frontend URLs here, e.g., "https://yourdomain.com"
+    "https://bertie.co.nz"
 ]
 
 app.add_middleware(
