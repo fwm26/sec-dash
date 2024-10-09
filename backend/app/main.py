@@ -1,17 +1,28 @@
 from fastapi import FastAPI
-from .database import init_db
+from . import models
+from .database import engine
 from .routes import router
-from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 
-# Lifespan event handler for startup and shutdown
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Code to run on startup
-    init_db()  # Initialize the database
-    yield  # Code after yield runs during shutdown
+# Create all tables
+models.Base.metadata.create_all(bind=engine)
 
-# Create FastAPI app
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(title="Sec-Dash API")
 
-# Include the API router
+# CORS settings (adjust origins as needed)
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    # Add your frontend URLs here, e.g., "https://yourdomain.com"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Specify allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],    # Allow all HTTP methods
+    allow_headers=["*"],    # Allow all headers
+)
+
+# Include the router
 app.include_router(router)
